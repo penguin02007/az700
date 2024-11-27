@@ -1,0 +1,573 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "networkInterfaces_az700_useast1_ap1574_name": {
+      "type": "String"
+    },
+    "networkInterfaces_az700_useast1_ap2798_name": {
+      "type": "String"
+    },
+    "networkSecurityGroups_az700_useast1_ap1_nsg_name": {
+      "type": "String"
+    },
+    "networkSecurityGroups_nsg1_name": {
+      "type": "String"
+    },
+    "publicIPAddresses_az700_useast1_ap1_ip_name": {
+      "type": "String"
+    },
+    "publicIPAddresses_az700_useast1_ap2_ip_name": {
+      "type": "String"
+    },
+    "virtualMachines_az700_useast1_ap1_name": {
+      "type": "String"
+    },
+    "virtualMachines_az700_useast1_ap2_name": {
+      "type": "String"
+    },
+    "virtualNetworks_vnet1_10_20_0_0_name": {
+      "type": "String"
+    },
+    "virtualNetworks_vnet2_10_10_0_0_externalid": {
+      "type": "String"
+    }
+  },
+  "resources": [
+    {
+      "apiVersion": "2024-01-01",
+      "location": "eastus",
+      "name": "[parameters('networkSecurityGroups_az700_useast1_ap1_nsg_name')]",
+      "properties": {
+        "securityRules": [
+          {
+            "id": "[resourceId('Microsoft.Network/networkSecurityGroups/securityRules', parameters('networkSecurityGroups_az700_useast1_ap1_nsg_name'), 'SSH')]",
+            "name": "SSH",
+            "properties": {
+              "access": "Allow",
+              "destinationAddressPrefix": "*",
+              "destinationAddressPrefixes": [],
+              "destinationPortRange": "22",
+              "destinationPortRanges": [],
+              "direction": "Inbound",
+              "priority": 300,
+              "protocol": "TCP",
+              "sourceAddressPrefix": "*",
+              "sourceAddressPrefixes": [],
+              "sourcePortRange": "*",
+              "sourcePortRanges": []
+            },
+            "type": "Microsoft.Network/networkSecurityGroups/securityRules"
+          }
+        ]
+      },
+      "type": "Microsoft.Network/networkSecurityGroups"
+    },
+    {
+      "apiVersion": "2024-01-01",
+      "location": "eastus",
+      "name": "[parameters('networkSecurityGroups_nsg1_name')]",
+      "properties": {
+        "securityRules": []
+      },
+      "type": "Microsoft.Network/networkSecurityGroups"
+    },
+    {
+      "apiVersion": "2024-01-01",
+      "location": "eastus",
+      "name": "[parameters('publicIPAddresses_az700_useast1_ap1_ip_name')]",
+      "properties": {
+        "idleTimeoutInMinutes": 4,
+        "ipAddress": "172.190.166.122",
+        "ipTags": [],
+        "publicIPAddressVersion": "IPv4",
+        "publicIPAllocationMethod": "Static"
+      },
+      "sku": {
+        "name": "Standard",
+        "tier": "Regional"
+      },
+      "type": "Microsoft.Network/publicIPAddresses"
+    },
+    {
+      "apiVersion": "2024-01-01",
+      "location": "eastus",
+      "name": "[parameters('publicIPAddresses_az700_useast1_ap2_ip_name')]",
+      "properties": {
+        "idleTimeoutInMinutes": 4,
+        "ipAddress": "52.191.78.180",
+        "ipTags": [],
+        "publicIPAddressVersion": "IPv4",
+        "publicIPAllocationMethod": "Static"
+      },
+      "sku": {
+        "name": "Standard",
+        "tier": "Regional"
+      },
+      "type": "Microsoft.Network/publicIPAddresses"
+    },
+    {
+      "apiVersion": "2024-07-01",
+      "dependsOn": [
+        "[resourceId('Microsoft.Network/networkInterfaces', parameters('networkInterfaces_az700_useast1_ap1574_name'))]"
+      ],
+      "location": "eastus",
+      "name": "[parameters('virtualMachines_az700_useast1_ap1_name')]",
+      "properties": {
+        "additionalCapabilities": {
+          "hibernationEnabled": false
+        },
+        "diagnosticsProfile": {
+          "bootDiagnostics": {
+            "enabled": true
+          }
+        },
+        "hardwareProfile": {
+          "vmSize": "Standard_DS1_v2"
+        },
+        "networkProfile": {
+          "networkInterfaces": [
+            {
+              "id": "[resourceId('Microsoft.Network/networkInterfaces', parameters('networkInterfaces_az700_useast1_ap1574_name'))]",
+              "properties": {
+                "deleteOption": "Detach"
+              }
+            }
+          ]
+        },
+        "osProfile": {
+          "adminUsername": "kadmin",
+          "allowExtensionOperations": true,
+          "computerName": "[parameters('virtualMachines_az700_useast1_ap1_name')]",
+          "linuxConfiguration": {
+            "disablePasswordAuthentication": true,
+            "patchSettings": {
+              "assessmentMode": "ImageDefault",
+              "patchMode": "ImageDefault"
+            },
+            "provisionVMAgent": true,
+            "ssh": {
+              "publicKeys": [
+                {
+                  "keyData": "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQC3BLGWwKyDpzlM4aHR8OHhcGJMoOov24F1kssmiZASmyAxEI5oZhQ5Prd8w0qDEbE1sdZ276Y7OA11+f2CFWROZQx8rSR4GIA2Q3Gyu/4nQ5+pYvFmHdKPWco7Gnsx+B0sEhZrjYtQt6AJCybhRkLw70gzA90rwUY7nqulmTzfplYnqEzaKaSFzzdgm9xccRvYn0y8dRM8w+TSJr5QNA8XNywl2QSjH8moL5htb8vvl7jjRkft63Uv7bKLnJTZl6p78/OvKUpk71syuEvKUudXUyr83jgPWgAL5OrCynVS1TTaC6zNC49VrD7+uktKQT8rWaRrKuySWsBsfZWxEC0HJdR20kr4qXQWWf0PHjcGB9Pysl5IzdkV9vgSKeByg64PgDyJUQFqDtkyzbJPLbscD+L0Ncf7RhZkX5F7go9BHvBnZdidzAUl871LYJqJm28F8CRRKahaix71TUb016OMfLh34CcC1f5CHsLpUATLCPz5mL9UZyytYNtj6VcKauioMEJuZCWmBJdJyH9lIJPqMGLndD117NyEeazoHfNGaa67lechW9Qa1QtJk59UvLOHEUekYLDiSytx6OXoBcVMbB9t1kYqoQJ+xsqUJJmRZubUhNjRKe7vTn1vJDjRsNXfx3Xe3EofhfR6skhZptVJ38cCFuFeGYNs1CaPYAUITQ== lchan@pgmbp1.local",
+                  "path": "/home/kadmin/.ssh/authorized_keys"
+                }
+              ]
+            }
+          },
+          "requireGuestProvisionSignal": true,
+          "secrets": []
+        },
+        "securityProfile": {
+          "securityType": "TrustedLaunch",
+          "uefiSettings": {
+            "secureBootEnabled": true,
+            "vTpmEnabled": true
+          }
+        },
+        "storageProfile": {
+          "dataDisks": [],
+          "diskControllerType": "SCSI",
+          "imageReference": {
+            "offer": "ubuntu-24_04-lts",
+            "publisher": "canonical",
+            "sku": "server",
+            "version": "latest"
+          },
+          "osDisk": {
+            "caching": "ReadWrite",
+            "createOption": "FromImage",
+            "deleteOption": "Delete",
+            "diskSizeGB": 30,
+            "managedDisk": {
+              "id": "[resourceId('Microsoft.Compute/disks', concat(parameters('virtualMachines_az700_useast1_ap1_name'), '_OsDisk_1_df09e351a7dd401bb72836a4b33d8bcb'))]",
+              "storageAccountType": "StandardSSD_LRS"
+            },
+            "name": "[concat(parameters('virtualMachines_az700_useast1_ap1_name'), '_OsDisk_1_df09e351a7dd401bb72836a4b33d8bcb')]",
+            "osType": "Linux"
+          }
+        }
+      },
+      "type": "Microsoft.Compute/virtualMachines"
+    },
+    {
+      "apiVersion": "2024-07-01",
+      "dependsOn": [
+        "[resourceId('Microsoft.Network/networkInterfaces', parameters('networkInterfaces_az700_useast1_ap2798_name'))]"
+      ],
+      "location": "eastus",
+      "name": "[parameters('virtualMachines_az700_useast1_ap2_name')]",
+      "properties": {
+        "additionalCapabilities": {
+          "hibernationEnabled": false
+        },
+        "diagnosticsProfile": {
+          "bootDiagnostics": {
+            "enabled": true
+          }
+        },
+        "hardwareProfile": {
+          "vmSize": "Standard_DS1_v2"
+        },
+        "networkProfile": {
+          "networkInterfaces": [
+            {
+              "id": "[resourceId('Microsoft.Network/networkInterfaces', parameters('networkInterfaces_az700_useast1_ap2798_name'))]",
+              "properties": {
+                "deleteOption": "Detach"
+              }
+            }
+          ]
+        },
+        "osProfile": {
+          "adminUsername": "kadmin",
+          "allowExtensionOperations": true,
+          "computerName": "[parameters('virtualMachines_az700_useast1_ap2_name')]",
+          "linuxConfiguration": {
+            "disablePasswordAuthentication": true,
+            "patchSettings": {
+              "assessmentMode": "ImageDefault",
+              "patchMode": "ImageDefault"
+            },
+            "provisionVMAgent": true,
+            "ssh": {
+              "publicKeys": [
+                {
+                  "keyData": "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQC3BLGWwKyDpzlM4aHR8OHhcGJMoOov24F1kssmiZASmyAxEI5oZhQ5Prd8w0qDEbE1sdZ276Y7OA11+f2CFWROZQx8rSR4GIA2Q3Gyu/4nQ5+pYvFmHdKPWco7Gnsx+B0sEhZrjYtQt6AJCybhRkLw70gzA90rwUY7nqulmTzfplYnqEzaKaSFzzdgm9xccRvYn0y8dRM8w+TSJr5QNA8XNywl2QSjH8moL5htb8vvl7jjRkft63Uv7bKLnJTZl6p78/OvKUpk71syuEvKUudXUyr83jgPWgAL5OrCynVS1TTaC6zNC49VrD7+uktKQT8rWaRrKuySWsBsfZWxEC0HJdR20kr4qXQWWf0PHjcGB9Pysl5IzdkV9vgSKeByg64PgDyJUQFqDtkyzbJPLbscD+L0Ncf7RhZkX5F7go9BHvBnZdidzAUl871LYJqJm28F8CRRKahaix71TUb016OMfLh34CcC1f5CHsLpUATLCPz5mL9UZyytYNtj6VcKauioMEJuZCWmBJdJyH9lIJPqMGLndD117NyEeazoHfNGaa67lechW9Qa1QtJk59UvLOHEUekYLDiSytx6OXoBcVMbB9t1kYqoQJ+xsqUJJmRZubUhNjRKe7vTn1vJDjRsNXfx3Xe3EofhfR6skhZptVJ38cCFuFeGYNs1CaPYAUITQ== lchan@pgmbp1.local\n",
+                  "path": "/home/kadmin/.ssh/authorized_keys"
+                }
+              ]
+            }
+          },
+          "requireGuestProvisionSignal": true,
+          "secrets": []
+        },
+        "securityProfile": {
+          "securityType": "TrustedLaunch",
+          "uefiSettings": {
+            "secureBootEnabled": true,
+            "vTpmEnabled": true
+          }
+        },
+        "storageProfile": {
+          "dataDisks": [],
+          "diskControllerType": "SCSI",
+          "imageReference": {
+            "offer": "ubuntu-24_04-lts",
+            "publisher": "canonical",
+            "sku": "server",
+            "version": "latest"
+          },
+          "osDisk": {
+            "caching": "ReadWrite",
+            "createOption": "FromImage",
+            "deleteOption": "Delete",
+            "diskSizeGB": 30,
+            "managedDisk": {
+              "id": "[resourceId('Microsoft.Compute/disks', concat(parameters('virtualMachines_az700_useast1_ap2_name'), '_disk1_e0705efbf39e467887143aa1fe0209bf'))]",
+              "storageAccountType": "Premium_LRS"
+            },
+            "name": "[concat(parameters('virtualMachines_az700_useast1_ap2_name'), '_disk1_e0705efbf39e467887143aa1fe0209bf')]",
+            "osType": "Linux"
+          }
+        }
+      },
+      "type": "Microsoft.Compute/virtualMachines"
+    },
+    {
+      "apiVersion": "2024-01-01",
+      "dependsOn": [
+        "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('networkSecurityGroups_az700_useast1_ap1_nsg_name'))]"
+      ],
+      "name": "[concat(parameters('networkSecurityGroups_az700_useast1_ap1_nsg_name'), '/SSH')]",
+      "properties": {
+        "access": "Allow",
+        "destinationAddressPrefix": "*",
+        "destinationAddressPrefixes": [],
+        "destinationPortRange": "22",
+        "destinationPortRanges": [],
+        "direction": "Inbound",
+        "priority": 300,
+        "protocol": "TCP",
+        "sourceAddressPrefix": "*",
+        "sourceAddressPrefixes": [],
+        "sourcePortRange": "*",
+        "sourcePortRanges": []
+      },
+      "type": "Microsoft.Network/networkSecurityGroups/securityRules"
+    },
+    {
+      "apiVersion": "2024-01-01",
+      "dependsOn": [
+        "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('networkSecurityGroups_nsg1_name'))]"
+      ],
+      "location": "eastus",
+      "name": "[parameters('virtualNetworks_vnet1_10_20_0_0_name')]",
+      "properties": {
+        "addressSpace": {
+          "addressPrefixes": [
+            "10.20.0.0/16"
+          ]
+        },
+        "enableDdosProtection": false,
+        "encryption": {
+          "enabled": false,
+          "enforcement": "AllowUnencrypted"
+        },
+        "subnets": [
+          {
+            "id": "[resourceId('Microsoft.Network/virtualNetworks/subnets', parameters('virtualNetworks_vnet1_10_20_0_0_name'), 'default')]",
+            "name": "default",
+            "properties": {
+              "addressPrefixes": [
+                "10.20.0.0/24"
+              ],
+              "defaultOutboundAccess": false,
+              "delegations": [],
+              "networkSecurityGroup": {
+                "id": "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('networkSecurityGroups_nsg1_name'))]"
+              },
+              "privateEndpointNetworkPolicies": "Disabled",
+              "privateLinkServiceNetworkPolicies": "Enabled"
+            },
+            "type": "Microsoft.Network/virtualNetworks/subnets"
+          },
+          {
+            "id": "[resourceId('Microsoft.Network/virtualNetworks/subnets', parameters('virtualNetworks_vnet1_10_20_0_0_name'), 'subnet20')]",
+            "name": "subnet20",
+            "properties": {
+              "addressPrefixes": [
+                "10.20.20.0/24"
+              ],
+              "delegations": [],
+              "privateEndpointNetworkPolicies": "Disabled",
+              "privateLinkServiceNetworkPolicies": "Enabled"
+            },
+            "type": "Microsoft.Network/virtualNetworks/subnets"
+          },
+          {
+            "id": "[resourceId('Microsoft.Network/virtualNetworks/subnets', parameters('virtualNetworks_vnet1_10_20_0_0_name'), 'subnet10')]",
+            "name": "subnet10",
+            "properties": {
+              "addressPrefixes": [
+                "10.20.10.0/24"
+              ],
+              "delegations": [],
+              "privateEndpointNetworkPolicies": "Disabled",
+              "privateLinkServiceNetworkPolicies": "Enabled"
+            },
+            "type": "Microsoft.Network/virtualNetworks/subnets"
+          }
+        ],
+        "virtualNetworkPeerings": [
+          {
+            "id": "[resourceId('Microsoft.Network/virtualNetworks/virtualNetworkPeerings', parameters('virtualNetworks_vnet1_10_20_0_0_name'), 'vnet2-to-vnet1')]",
+            "name": "vnet2-to-vnet1",
+            "properties": {
+              "allowForwardedTraffic": true,
+              "allowGatewayTransit": false,
+              "allowVirtualNetworkAccess": true,
+              "doNotVerifyRemoteGateways": false,
+              "peerCompleteVnets": true,
+              "peeringState": "Disconnected",
+              "peeringSyncLevel": "FullyInSync",
+              "remoteAddressSpace": {
+                "addressPrefixes": [
+                  "10.10.0.0/16"
+                ]
+              },
+              "remoteVirtualNetwork": {
+                "id": "[parameters('virtualNetworks_vnet2_10_10_0_0_externalid')]"
+              },
+              "remoteVirtualNetworkAddressSpace": {
+                "addressPrefixes": [
+                  "10.10.0.0/16"
+                ]
+              },
+              "useRemoteGateways": false
+            },
+            "type": "Microsoft.Network/virtualNetworks/virtualNetworkPeerings"
+          }
+        ]
+      },
+      "type": "Microsoft.Network/virtualNetworks"
+    },
+    {
+      "apiVersion": "2024-01-01",
+      "dependsOn": [
+        "[resourceId('Microsoft.Network/virtualNetworks', parameters('virtualNetworks_vnet1_10_20_0_0_name'))]"
+      ],
+      "name": "[concat(parameters('virtualNetworks_vnet1_10_20_0_0_name'), '/subnet10')]",
+      "properties": {
+        "addressPrefixes": [
+          "10.20.10.0/24"
+        ],
+        "delegations": [],
+        "privateEndpointNetworkPolicies": "Disabled",
+        "privateLinkServiceNetworkPolicies": "Enabled"
+      },
+      "type": "Microsoft.Network/virtualNetworks/subnets"
+    },
+    {
+      "apiVersion": "2024-01-01",
+      "dependsOn": [
+        "[resourceId('Microsoft.Network/virtualNetworks', parameters('virtualNetworks_vnet1_10_20_0_0_name'))]"
+      ],
+      "name": "[concat(parameters('virtualNetworks_vnet1_10_20_0_0_name'), '/subnet20')]",
+      "properties": {
+        "addressPrefixes": [
+          "10.20.20.0/24"
+        ],
+        "delegations": [],
+        "privateEndpointNetworkPolicies": "Disabled",
+        "privateLinkServiceNetworkPolicies": "Enabled"
+      },
+      "type": "Microsoft.Network/virtualNetworks/subnets"
+    },
+    {
+      "apiVersion": "2024-01-01",
+      "dependsOn": [
+        "[resourceId('Microsoft.Network/virtualNetworks', parameters('virtualNetworks_vnet1_10_20_0_0_name'))]"
+      ],
+      "name": "[concat(parameters('virtualNetworks_vnet1_10_20_0_0_name'), '/vnet2-to-vnet1')]",
+      "properties": {
+        "allowForwardedTraffic": true,
+        "allowGatewayTransit": false,
+        "allowVirtualNetworkAccess": true,
+        "doNotVerifyRemoteGateways": false,
+        "peerCompleteVnets": true,
+        "peeringState": "Disconnected",
+        "peeringSyncLevel": "FullyInSync",
+        "remoteAddressSpace": {
+          "addressPrefixes": [
+            "10.10.0.0/16"
+          ]
+        },
+        "remoteVirtualNetwork": {
+          "id": "[parameters('virtualNetworks_vnet2_10_10_0_0_externalid')]"
+        },
+        "remoteVirtualNetworkAddressSpace": {
+          "addressPrefixes": [
+            "10.10.0.0/16"
+          ]
+        },
+        "useRemoteGateways": false
+      },
+      "type": "Microsoft.Network/virtualNetworks/virtualNetworkPeerings"
+    },
+    {
+      "apiVersion": "2024-01-01",
+      "dependsOn": [
+        "[resourceId('Microsoft.Network/publicIPAddresses', parameters('publicIPAddresses_az700_useast1_ap2_ip_name'))]",
+        "[resourceId('Microsoft.Network/virtualNetworks/subnets', parameters('virtualNetworks_vnet1_10_20_0_0_name'), 'subnet20')]"
+      ],
+      "kind": "Regular",
+      "location": "eastus",
+      "name": "[parameters('networkInterfaces_az700_useast1_ap2798_name')]",
+      "properties": {
+        "auxiliaryMode": "None",
+        "auxiliarySku": "None",
+        "disableTcpStateTracking": false,
+        "dnsSettings": {
+          "dnsServers": []
+        },
+        "enableAcceleratedNetworking": true,
+        "enableIPForwarding": false,
+        "ipConfigurations": [
+          {
+            "id": "[concat(resourceId('Microsoft.Network/networkInterfaces', parameters('networkInterfaces_az700_useast1_ap2798_name')), '/ipConfigurations/ipconfig1')]",
+            "name": "ipconfig1",
+            "properties": {
+              "primary": true,
+              "privateIPAddress": "10.20.20.4",
+              "privateIPAddressVersion": "IPv4",
+              "privateIPAllocationMethod": "Dynamic",
+              "publicIPAddress": {
+                "id": "[resourceId('Microsoft.Network/publicIPAddresses', parameters('publicIPAddresses_az700_useast1_ap2_ip_name'))]",
+                "properties": {
+                  "deleteOption": "Detach"
+                }
+              },
+              "subnet": {
+                "id": "[resourceId('Microsoft.Network/virtualNetworks/subnets', parameters('virtualNetworks_vnet1_10_20_0_0_name'), 'subnet20')]"
+              }
+            },
+            "type": "Microsoft.Network/networkInterfaces/ipConfigurations"
+          }
+        ],
+        "nicType": "Standard"
+      },
+      "type": "Microsoft.Network/networkInterfaces"
+    },
+    {
+      "apiVersion": "2024-01-01",
+      "dependsOn": [
+        "[resourceId('Microsoft.Network/virtualNetworks', parameters('virtualNetworks_vnet1_10_20_0_0_name'))]",
+        "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('networkSecurityGroups_nsg1_name'))]"
+      ],
+      "name": "[concat(parameters('virtualNetworks_vnet1_10_20_0_0_name'), '/default')]",
+      "properties": {
+        "addressPrefixes": [
+          "10.20.0.0/24"
+        ],
+        "defaultOutboundAccess": false,
+        "delegations": [],
+        "networkSecurityGroup": {
+          "id": "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('networkSecurityGroups_nsg1_name'))]"
+        },
+        "privateEndpointNetworkPolicies": "Disabled",
+        "privateLinkServiceNetworkPolicies": "Enabled"
+      },
+      "type": "Microsoft.Network/virtualNetworks/subnets"
+    },
+    {
+      "apiVersion": "2024-01-01",
+      "dependsOn": [
+        "[resourceId('Microsoft.Network/publicIPAddresses', parameters('publicIPAddresses_az700_useast1_ap1_ip_name'))]",
+        "[resourceId('Microsoft.Network/virtualNetworks/subnets', parameters('virtualNetworks_vnet1_10_20_0_0_name'), 'default')]",
+        "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('networkSecurityGroups_az700_useast1_ap1_nsg_name'))]"
+      ],
+      "kind": "Regular",
+      "location": "eastus",
+      "name": "[parameters('networkInterfaces_az700_useast1_ap1574_name')]",
+      "properties": {
+        "auxiliaryMode": "None",
+        "auxiliarySku": "None",
+        "disableTcpStateTracking": false,
+        "dnsSettings": {
+          "dnsServers": []
+        },
+        "enableAcceleratedNetworking": true,
+        "enableIPForwarding": false,
+        "ipConfigurations": [
+          {
+            "id": "[concat(resourceId('Microsoft.Network/networkInterfaces', parameters('networkInterfaces_az700_useast1_ap1574_name')), '/ipConfigurations/ipconfig1')]",
+            "name": "ipconfig1",
+            "properties": {
+              "primary": true,
+              "privateIPAddress": "10.20.0.5",
+              "privateIPAddressVersion": "IPv4",
+              "privateIPAllocationMethod": "Dynamic",
+              "publicIPAddress": {
+                "id": "[resourceId('Microsoft.Network/publicIPAddresses', parameters('publicIPAddresses_az700_useast1_ap1_ip_name'))]",
+                "properties": {
+                  "deleteOption": "Detach"
+                }
+              },
+              "subnet": {
+                "id": "[resourceId('Microsoft.Network/virtualNetworks/subnets', parameters('virtualNetworks_vnet1_10_20_0_0_name'), 'default')]"
+              }
+            },
+            "type": "Microsoft.Network/networkInterfaces/ipConfigurations"
+          }
+        ],
+        "networkSecurityGroup": {
+          "id": "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('networkSecurityGroups_az700_useast1_ap1_nsg_name'))]"
+        },
+        "nicType": "Standard"
+      },
+      "type": "Microsoft.Network/networkInterfaces"
+    }
+  ],
+  "variables": {}
+}

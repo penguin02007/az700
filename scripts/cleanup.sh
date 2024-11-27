@@ -1,0 +1,1 @@
+az group delete --name az700 --yes --no-wait
